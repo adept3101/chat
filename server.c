@@ -75,15 +75,15 @@ int main() {
   int bytes_read = read(client, buffer, sizeof(buffer) - 1);
   if (bytes_read > 0) {
     buffer[bytes_read] = '\0';
+    printf("Сообщение клиента:%s", buffer);
   }
 
-  const char *response = "Hello, client!";
-  // char *response;
+  char msg[64] = {0};
 
-  // printf("Введите сообщение:");
-  // fgets(response, 32, stdin);
+  printf(":");
+  fgets(msg, 64, stdin);
 
-  send(client, response, strlen(response), 0);
+  send(client, msg, strlen(msg), 0);
 
   close(client);
   close(sock);
