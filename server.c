@@ -43,7 +43,7 @@ int main() {
   }
 
   char *addr_server = inet_ntoa(addr.sin_addr);
-  printf("ip_address of server: %s:%d\n", addr_server, addr.sin_port);
+  printf("ip_address of server: %s:%d\n", addr_server, ntohs(addr.sin_port));
 
   int client;
   int c = sizeof(struct sockaddr_in);
