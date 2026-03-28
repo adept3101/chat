@@ -29,18 +29,18 @@ int main() {
   }
 
   char msg[64] = {0};
+  while (1) {
+    printf(":");
+    fgets(msg, 64, stdin);
 
-  printf(":");
-  fgets(msg, 64, stdin);
+    send(sock, msg, strlen(msg), 0);
 
-  send(sock, msg, strlen(msg), 0);
-
-  int bytes_read = read(sock, buff, sizeof(buff) - 1);
-  if (bytes_read > 0) {
-    buff[bytes_read] = '\0';
-    printf("Сообщение сервера:%s\n", buff);
+    int bytes_read = read(sock, buff, sizeof(buff) - 1);
+    if (bytes_read > 0) {
+      buff[bytes_read] = '\0';
+      printf("Сообщение сервера:%s\n", buff);
+    }
   }
-
   close(sock);
   return 0;
 }

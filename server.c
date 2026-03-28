@@ -1,10 +1,33 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+// typedef struct {
+//   int socket;
+// } client_data;
+//
+// void *get_msg(void *arg) {
+//   client_data *data = (client_data *)arg;
+//   int client_sock = data->socket;
+//   char buffer[1024] = {0};
+//
+//   while (1) {
+//     size_t bytes_read = read(client_sock, buffer, sizeof(buffer) - 1);
+//     if (bytes_read > 0) {
+//       buffer[bytes_read] = '\0';
+//       printf("Сообщение клиента:%s", buffer);
+//     }
+//   }
+//
+//   close(client_sock);
+//   free(data);
+//   return NULL;
+// }
 
 int main() {
   struct sockaddr_in addr, _client;
@@ -14,7 +37,7 @@ int main() {
 
   if (sock == -1) {
     perror("Failed init socket\n");
-    exit(EXIT_FAILURE);
+    exit(1);
   } else {
     printf("Socket init ok\n");
   }
@@ -24,12 +47,12 @@ int main() {
   memset(&addr, 0, sizeof(addr));
 
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = htons(INADDR_ANY); // inet_addr
+  addr.sin_addr.s_addr = INADDR_ANY; // inet_addr
   addr.sin_port = htons(8000);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
     perror("Error bind\n");
-    exit(EXIT_FAILURE);
+    exit(1);
   } else {
     printf("bind ok\n");
   }
@@ -37,7 +60,7 @@ int main() {
   if (listen(sock, 1) == -1) {
     perror("Listening failed\n");
     close(sock);
-    exit(EXIT_FAILURE);
+    exit(1);
   } else {
     printf("Listening...\n");
   }
@@ -45,23 +68,12 @@ int main() {
   char *addr_server = inet_ntoa(addr.sin_addr);
   printf("ip_address of server: %s:%d\n", addr_server, ntohs(addr.sin_port));
 
+  pthread_t thr_res;
+
   int client;
   int c = sizeof(struct sockaddr_in);
 
-  // while (1) {
-  //   client = accept(sock, (struct sockaddr *)&client, (socklen_t *)&c);
-  //   char *addr_client = inet_ntoa(_client.sin_addr);
-  //   int port = htons(_client.sin_port);
-  //
-  //   if (client == -1) {
-  //     perror("Error client\n");
-  //     exit(EXIT_FAILURE);
-  //   } else {
-  //     printf("connected with client\n");
-  //     printf("ip-address of client: %s:%d\n", addr_client, port);
-  //   }
-  // }
-  client = accept(sock, (struct sockaddr *)&client, (socklen_t *)&c);
+  client = accept(sock, (struct sockaddr *)&_client, (socklen_t *)&c);
   char *addr_client = inet_ntoa(_client.sin_addr);
 
   if (client == -1) {
@@ -69,21 +81,35 @@ int main() {
     exit(1);
   } else {
     printf("Connected with client\n");
-    printf("ip-address of client: %s:%d\n", addr_client, _client.sin_port);
+    printf("ip-address of client: %s:%d\n", addr_client,
+           ntohs(_client.sin_port));
   }
 
-  int bytes_read = read(client, buffer, sizeof(buffer) - 1);
-  if (bytes_read > 0) {
-    buffer[bytes_read] = '\0';
-    printf("Сообщение клиента:%s", buffer);
+  // client_data *arg = malloc(sizeof(client_data));
+  //
+  // arg->socket = client;
+  //
+  // pthread_create(&thr_res, NULL, get_msg, (void *)arg);
+  while (1) {
+    int bytes_read = read(client, buffer, sizeof(buffer) - 1);
+
+    if (bytes_read > 0) {
+      buffer[bytes_read] = '\0';
+      printf("Сообщение клиента:%s", buffer);
+    }
+    // while ((bytes_read = recv(client, buffer, sizeof(buffer) - 1, 0)) > 0) {
+    //   buffer[bytes_read] = '\0';
+    //   printf("Сообщение клиента:%s", buffer);
+    // }
+
+    char msg[64] = {0};
+
+    printf(":");
+    fgets(msg, 64, stdin);
+
+    send(client, msg, strlen(msg), 0);
   }
-
-  char msg[64] = {0};
-
-  printf(":");
-  fgets(msg, 64, stdin);
-
-  send(client, msg, strlen(msg), 0);
+  // pthread_exit(&thr_res);
 
   close(client);
   close(sock);
