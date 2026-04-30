@@ -1,7 +1,7 @@
 all: server client
 
 server:
-	gcc server.c -o server
+	cc src/server.c -o build/server
 
 client:
-	gcc client.c -o client
+	cc src/client.c -o build/client
