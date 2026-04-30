@@ -1,3 +1,4 @@
+#include "config.h"
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -7,39 +8,15 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-// typedef struct {
-//   int socket;
-// } client_data;
-//
-// void *get_msg(void *arg) {
-//   client_data *data = (client_data *)arg;
-//   int client_sock = data->socket;
-//   char buffer[1024] = {0};
-//
-//   while (1) {
-//     size_t bytes_read = read(client_sock, buffer, sizeof(buffer) - 1);
-//     if (bytes_read > 0) {
-//       buffer[bytes_read] = '\0';
-//       printf("Сообщение клиента:%s", buffer);
-//     }
-//   }
-//
-//   close(client_sock);
-//   free(data);
-//   return NULL;
-// }
-
 int main() {
   struct sockaddr_in addr, _client;
-  int sock;
-  sock = socket(AF_INET, SOCK_STREAM, 0);
-  char buffer[1024] = {0};
+  char buffer[BUFF_SIZE] = {0};
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock == -1) {
-    perror("Failed init socket\n");
-    exit(1);
+    perror("Error init sock");
   } else {
-    printf("Socket init ok\n");
+    printf("Successfully init sock\n");
   }
 
   int opt = 1;
@@ -47,8 +24,8 @@ int main() {
   memset(&addr, 0, sizeof(addr));
 
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = INADDR_ANY; // inet_addr
-  addr.sin_port = htons(8000);
+  addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+  addr.sin_port = htons(PORT);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
     perror("Error bind\n");
@@ -65,15 +42,18 @@ int main() {
     printf("Listening...\n");
   }
 
+  char *name;
+  printf("Enter name:");
+  scanf("%s", name);
+
   char *addr_server = inet_ntoa(addr.sin_addr);
   printf("ip_address of server: %s:%d\n", addr_server, ntohs(addr.sin_port));
+  printf("User:%s\n", name);
 
   pthread_t thr_res;
 
-  int client;
   int c = sizeof(struct sockaddr_in);
-
-  client = accept(sock, (struct sockaddr *)&_client, (socklen_t *)&c);
+  int client = accept(sock, (struct sockaddr *)&_client, (socklen_t *)&c);
   char *addr_client = inet_ntoa(_client.sin_addr);
 
   if (client == -1) {
@@ -85,31 +65,21 @@ int main() {
            ntohs(_client.sin_port));
   }
 
-  // client_data *arg = malloc(sizeof(client_data));
-  //
-  // arg->socket = client;
-  //
-  // pthread_create(&thr_res, NULL, get_msg, (void *)arg);
+
   while (1) {
     int bytes_read = read(client, buffer, sizeof(buffer) - 1);
 
     if (bytes_read > 0) {
       buffer[bytes_read] = '\0';
-      printf("Сообщение клиента:%s", buffer);
+      // printf("%s:%s", client_name, buffer);
     }
-    // while ((bytes_read = recv(client, buffer, sizeof(buffer) - 1, 0)) > 0) {
-    //   buffer[bytes_read] = '\0';
-    //   printf("Сообщение клиента:%s", buffer);
-    // }
 
-    char msg[64] = {0};
+    char msg[MSG_SIZE] = {0};
 
     printf(":");
-    fgets(msg, 64, stdin);
-
+    fgets(msg, MSG_SIZE, stdin);
     send(client, msg, strlen(msg), 0);
   }
-  // pthread_exit(&thr_res);
 
   close(client);
   close(sock);
