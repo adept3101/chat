@@ -10,7 +10,7 @@
 
 int main() {
   struct sockaddr_in addr, _client;
-  char buffer[BUFF_SIZE] = {0};
+  char buff[BUFF_SIZE] = {0};
   int sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock == -1) {
@@ -42,15 +42,12 @@ int main() {
     printf("Listening...\n");
   }
 
-  char *name;
+  char name[32];
   printf("Enter name:");
-  scanf("%s", name);
+  fgets(name, 32, stdin);
 
   char *addr_server = inet_ntoa(addr.sin_addr);
   printf("ip_address of server: %s:%d\n", addr_server, ntohs(addr.sin_port));
-  printf("User:%s\n", name);
-
-  pthread_t thr_res;
 
   int c = sizeof(struct sockaddr_in);
   int client = accept(sock, (struct sockaddr *)&_client, (socklen_t *)&c);
@@ -65,20 +62,24 @@ int main() {
            ntohs(_client.sin_port));
   }
 
+  int name_read = read(sock, buff, sizeof(buff) - 1);
+  if (name_read > 0) {
+    buff[name_read] = '\0';
+
+    printf("client name:%s\n", buff);
+  }
 
   while (1) {
-    int bytes_read = read(client, buffer, sizeof(buffer) - 1);
+    int bytes_read = read(client, buff, sizeof(buff) - 1);
 
     if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
+      buff[bytes_read] = '\0';
       // printf("%s:%s", client_name, buffer);
     }
 
-    char msg[MSG_SIZE] = {0};
-
-    printf(":");
-    fgets(msg, MSG_SIZE, stdin);
-    send(client, msg, strlen(msg), 0);
+    printf("$%s:", name);
+    fgets(buff, BUFF_SIZE, stdin);
+    send(client, buff, strlen(buff), 0);
   }
 
   close(client);

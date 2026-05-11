@@ -1,16 +1,14 @@
+#include "config.h"
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/socket.h>
 #include <unistd.h>
-#include "config.h"
 
 int main() {
-  char *name;
-  printf("Enter name:");
-  scanf("%s", name);
 
   struct sockaddr_in addr;
   int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -26,18 +24,25 @@ int main() {
   addr.sin_addr.s_addr = inet_addr("127.0.0.1");
   addr.sin_port = htons(8000);
 
-  if (connect(sock, (const struct sockaddr*) &addr, sizeof(addr)) == -1){
+  if (connect(sock, (const struct sockaddr *)&addr, sizeof(addr)) == -1) {
     perror("Connection failed");
   } else {
     printf("Connection success\n");
   }
 
-  char msg[MSG_SIZE] = {0};
-  while (1) {
-    printf(":");
-    fgets(msg, MSG_SIZE, stdin);
+  // char *name = malloc(sizeof(char));
+  char name[32];
 
-    send(sock, msg, strlen(msg), 0);
+  printf("Enter name:");
+  // scanf("%s", name);
+  fgets(name, 32, stdin);
+  send(sock, name, strlen(name), 0);
+
+  while (1) {
+    printf("$%s:", name);
+    fgets(buff, BUFF_SIZE, stdin);
+
+    send(sock, buff, strlen(buff), 0);
 
     int bytes_read = read(sock, buff, sizeof(buff) - 1);
     if (bytes_read > 0) {
@@ -46,5 +51,7 @@ int main() {
     }
   }
   close(sock);
+  // free(name);
+
   return 0;
 }
