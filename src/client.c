@@ -30,13 +30,19 @@ int main() {
     printf("Connection success\n");
   }
 
-  // char *name = malloc(sizeof(char));
   char name[32];
-
   printf("Enter name:");
-  // scanf("%s", name);
-  fgets(name, 32, stdin);
-  send(sock, name, strlen(name), 0);
+  fgets(name, sizeof(name), stdin);
+  name[strcspn(name, "\n")] = '\0';
+  snprintf(buff, sizeof(buff), "%s\n", name);
+  send(sock, buff, strlen(buff), 0);
+
+  int name_read = read(sock, buff, sizeof(buff) - 1);
+  if (name_read > 0) {
+    buff[name_read] = '\0';
+
+    printf("server name:%s\n", buff);
+  }
 
   while (1) {
     printf("$%s:", name);
@@ -50,6 +56,7 @@ int main() {
       printf("Сообщение сервера:%s\n", buff);
     }
   }
+
   close(sock);
   // free(name);
 

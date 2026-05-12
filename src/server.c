@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 int main() {
@@ -42,9 +43,6 @@ int main() {
     printf("Listening...\n");
   }
 
-  char name[32];
-  printf("Enter name:");
-  fgets(name, 32, stdin);
 
   char *addr_server = inet_ntoa(addr.sin_addr);
   printf("ip_address of server: %s:%d\n", addr_server, ntohs(addr.sin_port));
@@ -62,7 +60,21 @@ int main() {
            ntohs(_client.sin_port));
   }
 
-  int name_read = read(sock, buff, sizeof(buff) - 1);
+  char name[32];
+  printf("Enter name: ");
+  fgets(name, sizeof(name), stdin);
+  name[strcspn(name, "\n")] = '\0';
+  snprintf(buff, sizeof(buff), "%s\n", name);
+
+  ssize_t res = send(client, buff, strlen(buff), 0);
+  if (res == -1){
+    perror("Send failed\n");
+    exit(1);
+  } else {
+    printf("Send success\n");
+  }
+  
+  int name_read = read(client, buff, sizeof(buff) - 1);
   if (name_read > 0) {
     buff[name_read] = '\0';
 
@@ -74,7 +86,7 @@ int main() {
 
     if (bytes_read > 0) {
       buff[bytes_read] = '\0';
-      // printf("%s:%s", client_name, buffer);
+      // printf("%s:%s", client_name, buff);
     }
 
     printf("$%s:", name);
