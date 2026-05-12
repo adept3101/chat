@@ -9,19 +9,34 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-void *send_msg(void *arg, char name[], char buff[], int sock) {
-  printf("$%s:", name);
-  fgets(buff, BUFF_SIZE, stdin);
-  send(sock, buff, strlen(buff), 0);
+typedef struct {
+  int sock;
+  char name[32];
+} thread_data;
+
+void *send_msg(void *arg) {
+  thread_data *data = (thread_data *)arg;
+  char buff[BUFF_SIZE];
+
+  while (1) {
+    printf("$%s:", data->name);
+    fgets(buff, BUFF_SIZE, stdin);
+    send(data->sock, buff, strlen(buff), 0);
+  }
 
   return NULL;
 }
 
-void *get_msg(void *arg, char name[], char buff[], int sock) {
-  int bytes_read = read(sock, buff, BUFF_SIZE - 1);
-  if (bytes_read > 0) {
-    buff[bytes_read] = '\0';
-    printf(":%s\n", buff);
+void *get_msg(void *arg) {
+  thread_data *data = (thread_data *)arg;
+  char buff[BUFF_SIZE];
+
+  while (1) {
+    int bytes_read = read(data->sock, buff, BUFF_SIZE - 1);
+    if (bytes_read > 0) {
+      buff[bytes_read] = '\0';
+      printf(":%s\n", buff);
+    }
   }
 
   return NULL;
@@ -85,19 +100,21 @@ int main() {
   snprintf(buff, sizeof(buff), "%s\n", name);
 
   ssize_t res = send(client, buff, strlen(buff), 0);
-  if (res == -1){
+  if (res == -1) {
     perror("Send failed\n");
     exit(1);
   } else {
     printf("Send success\n");
   }
-  
+
   int name_read = read(client, buff, sizeof(buff) - 1);
   if (name_read > 0) {
     buff[name_read] = '\0';
 
     printf("client name:%s\n", buff);
   }
+
+  pthread_create(&thr1, NULL, send_msg, );
 
   // while (1) {
   //   int bytes_read = read(client, buff, sizeof(buff) - 1);
