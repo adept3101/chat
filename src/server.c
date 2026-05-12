@@ -9,10 +9,29 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+void *send_msg(void *arg, char name[], char buff[], int sock) {
+  printf("$%s:", name);
+  fgets(buff, BUFF_SIZE, stdin);
+  send(sock, buff, strlen(buff), 0);
+
+  return NULL;
+}
+
+void *get_msg(void *arg, char name[], char buff[], int sock) {
+  int bytes_read = read(sock, buff, BUFF_SIZE - 1);
+  if (bytes_read > 0) {
+    buff[bytes_read] = '\0';
+    printf(":%s\n", buff);
+  }
+
+  return NULL;
+}
+
 int main() {
   struct sockaddr_in addr, _client;
   char buff[BUFF_SIZE] = {0};
   int sock = socket(AF_INET, SOCK_STREAM, 0);
+  pthread_t thr1, thr2;
 
   if (sock == -1) {
     perror("Error init sock");
@@ -42,7 +61,6 @@ int main() {
   } else {
     printf("Listening...\n");
   }
-
 
   char *addr_server = inet_ntoa(addr.sin_addr);
   printf("ip_address of server: %s:%d\n", addr_server, ntohs(addr.sin_port));
@@ -81,18 +99,18 @@ int main() {
     printf("client name:%s\n", buff);
   }
 
-  while (1) {
-    int bytes_read = read(client, buff, sizeof(buff) - 1);
-
-    if (bytes_read > 0) {
-      buff[bytes_read] = '\0';
-      // printf("%s:%s", client_name, buff);
-    }
-
-    printf("$%s:", name);
-    fgets(buff, BUFF_SIZE, stdin);
-    send(client, buff, strlen(buff), 0);
-  }
+  // while (1) {
+  //   int bytes_read = read(client, buff, sizeof(buff) - 1);
+  //
+  //   if (bytes_read > 0) {
+  //     buff[bytes_read] = '\0';
+  //     // printf("%s:%s", client_name, buff);
+  //   }
+  //
+  //   printf("$%s:", name);
+  //   fgets(buff, BUFF_SIZE, stdin);
+  //   send(client, buff, strlen(buff), 0);
+  // }
 
   close(client);
   close(sock);
