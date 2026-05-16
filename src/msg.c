@@ -5,21 +5,30 @@
 #include <string.h>
 #include <sys/socket.h>
 
-char get_msg(int sock, char buff[]) {
+void *get_msg(void *arg) {
+  thread_data *data = (thread_data *)arg;
+  char buff[BUFF_SIZE];
 
-  int bytes_read = read(sock, buff, sizeof(buff) - 1);
-
-  if (bytes_read > 0) {
-    buff[bytes_read] = '\0';
-    // printf("%s:%s", client_name, buffer);
+  while (1) {
+    printf("$%s:", data->name);
+    fgets(buff, BUFF_SIZE, stdin);
+    send(data->sock, buff, strlen(buff), 0);
   }
-  return buff[bytes_read];
+
+  return NULL;
 }
 
-char send_msg(char *usr, int sock, char buff[]) {
+void *send_msg(void *arg) {
+  thread_data *data = (thread_data *)arg;
+  char buff[BUFF_SIZE];
 
-  printf("$%s:", usr);
-  fgets(buff, BUFF_SIZE, stdin);
+  while (1) {
+    int bytes_read = read(data->sock, buff, BUFF_SIZE - 1);
+    // if (bytes_read > 0) {
+      buff[bytes_read] = '\0';
+      printf(":%s\n", buff);
+    // }
+  }
 
-  send(sock, buff, strlen(buff), 0);
+  return NULL;
 }
