@@ -1,11 +1,11 @@
 #include "msg.h"
 #include "config.h"
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
-void *get_msg(void *arg) {
+void *send_msg(void *arg) {
   thread_data *data = (thread_data *)arg;
   char buff[BUFF_SIZE];
 
@@ -18,16 +18,19 @@ void *get_msg(void *arg) {
   return NULL;
 }
 
-void *send_msg(void *arg) {
+void *get_msg(void *arg) {
   thread_data *data = (thread_data *)arg;
   char buff[BUFF_SIZE];
 
   while (1) {
-    int bytes_read = read(data->sock, buff, BUFF_SIZE - 1);
-    // if (bytes_read > 0) {
-      buff[bytes_read] = '\0';
-      printf(":%s\n", buff);
-    // }
+    // int bytes_read = read(data->sock, buff, BUFF_SIZE - 1);
+    int bytes_read = recv(data->sock, buff, BUFF_SIZE - 1, 0);
+    if (bytes_read <= 0) {
+      printf("Disconnected\n");
+      break;
+    }
+    buff[bytes_read] = '\0';
+    printf("1:%s\n", buff);
   }
 
   return NULL;

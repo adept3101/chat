@@ -26,7 +26,7 @@ int main() {
   strcpy(data.name, "negroni");
 
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+  addr.sin_addr.s_addr = inet_addr(IP);
   addr.sin_port = htons(8000);
 
   if (connect(sock, (const struct sockaddr *)&addr, sizeof(addr)) == -1) {

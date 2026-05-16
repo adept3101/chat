@@ -12,7 +12,6 @@
 
 int main() {
   struct sockaddr_in addr, _client;
-  char buff[BUFF_SIZE] = {0};
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   pthread_t thr1, thr2;
   thread_data data;
@@ -24,14 +23,13 @@ int main() {
     printf("Successfully init sock\n");
   }
 
-  data.sock = sock;
   strcpy(data.name, "serva4ok");
 
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
   memset(&addr, 0, sizeof(addr));
 
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+  addr.sin_addr.s_addr = inet_addr(IP);
   addr.sin_port = htons(PORT);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
@@ -65,8 +63,10 @@ int main() {
            ntohs(_client.sin_port));
   }
 
-  pthread_create(&thr1, NULL, (void *) send_msg, &data);
-  pthread_create(&thr2, NULL, (void *) get_msg, &data);
+  data.sock = client;
+
+  pthread_create(&thr1, NULL, send_msg, &data);
+  pthread_create(&thr2, NULL, get_msg, &data);
 
   pthread_join(thr1, NULL);
   pthread_join(thr2, NULL);
