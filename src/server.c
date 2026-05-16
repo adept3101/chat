@@ -8,45 +8,15 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-typedef struct {
-  int sock;
-  char name[32];
-} thread_data;
-
-void *send_msg(void *arg) {
-  thread_data *data = (thread_data *)arg;
-  char buff[BUFF_SIZE];
-
-  while (1) {
-    printf("$%s:", data->name);
-    fgets(buff, BUFF_SIZE, stdin);
-    send(data->sock, buff, strlen(buff), 0);
-  }
-
-  return NULL;
-}
-
-void *get_msg(void *arg) {
-  thread_data *data = (thread_data *)arg;
-  char buff[BUFF_SIZE];
-
-  while (1) {
-    int bytes_read = read(data->sock, buff, BUFF_SIZE - 1);
-    if (bytes_read > 0) {
-      buff[bytes_read] = '\0';
-      printf(":%s\n", buff);
-    }
-  }
-
-  return NULL;
-}
+#include "msg.h"
 
 int main() {
   struct sockaddr_in addr, _client;
   char buff[BUFF_SIZE] = {0};
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   pthread_t thr1, thr2;
+  thread_data data;
+  int opt = 1;
 
   if (sock == -1) {
     perror("Error init sock");
@@ -54,7 +24,9 @@ int main() {
     printf("Successfully init sock\n");
   }
 
-  int opt = 1;
+  data.sock = sock;
+  strcpy(data.name, "serva4ok");
+
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
   memset(&addr, 0, sizeof(addr));
 
@@ -93,41 +65,11 @@ int main() {
            ntohs(_client.sin_port));
   }
 
-  char name[32];
-  printf("Enter name: ");
-  fgets(name, sizeof(name), stdin);
-  name[strcspn(name, "\n")] = '\0';
-  snprintf(buff, sizeof(buff), "%s\n", name);
+  pthread_create(&thr1, NULL, (void *) send_msg, &data);
+  pthread_create(&thr2, NULL, (void *) get_msg, &data);
 
-  ssize_t res = send(client, buff, strlen(buff), 0);
-  if (res == -1) {
-    perror("Send failed\n");
-    exit(1);
-  } else {
-    printf("Send success\n");
-  }
-
-  int name_read = read(client, buff, sizeof(buff) - 1);
-  if (name_read > 0) {
-    buff[name_read] = '\0';
-
-    printf("client name:%s\n", buff);
-  }
-
-  pthread_create(&thr1, NULL, send_msg, );
-
-  // while (1) {
-  //   int bytes_read = read(client, buff, sizeof(buff) - 1);
-  //
-  //   if (bytes_read > 0) {
-  //     buff[bytes_read] = '\0';
-  //     // printf("%s:%s", client_name, buff);
-  //   }
-  //
-  //   printf("$%s:", name);
-  //   fgets(buff, BUFF_SIZE, stdin);
-  //   send(client, buff, strlen(buff), 0);
-  // }
+  pthread_join(thr1, NULL);
+  pthread_join(thr2, NULL);
 
   close(client);
   close(sock);
