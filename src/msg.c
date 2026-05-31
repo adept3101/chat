@@ -31,7 +31,14 @@ void *get_msg(void *arg) {
     }
     buff[bytes_read] = '\0';
     printf("1:%s\n", buff);
+    log_msg(buff);
   }
 
   return NULL;
+}
+
+void log_msg(char buff[32]){
+  FILE *fp = fopen("log.txt", "a");
+  fputs(buff, fp);
+  fclose(fp);
 }

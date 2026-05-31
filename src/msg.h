@@ -3,6 +3,7 @@
 
 void* get_msg(void *arg);
 void* send_msg(void *arg);
+void log_msg(char buff[32]);
 
 typedef struct {
   int sock;

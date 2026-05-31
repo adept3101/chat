@@ -4,10 +4,10 @@
 #include <pthread.h>
 #include <stdio.h>
 // #include <stdlib.h>
+#include "msg.h"
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "msg.h"
 
 int main() {
   struct sockaddr_in addr;

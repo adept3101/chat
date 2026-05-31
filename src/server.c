@@ -1,4 +1,5 @@
 #include "config.h"
+#include "msg.h"
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -8,7 +9,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "msg.h"
 
 int main() {
   struct sockaddr_in addr, _client;
