@@ -23,7 +23,7 @@ int main() {
   }
 
   data.sock = sock;
-  strcpy(data.name, "negroni");
+  strcpy(data.name, "cl1ent");
 
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = inet_addr(IP);
@@ -35,7 +35,7 @@ int main() {
     printf("Connection success\n");
   }
 
-  pthread_mutex_init(&m, NULL);
+  // pthread_mutex_init(&m, NULL);
 
   pthread_create(&thr1, NULL, send_msg, &data);
   pthread_create(&thr2, NULL, get_msg, &data);
@@ -43,7 +43,7 @@ int main() {
   pthread_join(thr1, NULL);
   pthread_join(thr2, NULL);
 
-  pthread_mutex_destroy(&m);
+  // pthread_mutex_destroy(&m);
 
   close(sock);
 

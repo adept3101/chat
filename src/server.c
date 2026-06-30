@@ -65,7 +65,7 @@ int main() {
 
   data.sock = client;
 
-  pthread_mutex_init(&m, NULL);
+  // pthread_mutex_init(&m, NULL);
 
   pthread_create(&thr1, NULL, send_msg, &data);
   pthread_create(&thr2, NULL, get_msg, &data);
@@ -73,7 +73,7 @@ int main() {
   pthread_join(thr1, NULL);
   pthread_join(thr2, NULL);
 
-  pthread_mutex_destroy(&m);
+  // pthread_mutex_destroy(&m);
 
   close(client);
   close(sock);

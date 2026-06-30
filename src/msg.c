@@ -7,13 +7,18 @@
 #include <unistd.h>
 #include <time.h>
 
+pthread_mutex_t m;
+
+// pthread_mutex_init(&m, NULL);
+
 void *send_msg(void *arg) {
   thread_data *data = (thread_data *)arg;
   char buff[BUFF_SIZE];
   
+  pthread_mutex_init(&m, NULL);
   pthread_mutex_lock(&m);
   while (1) {
-    printf("$%s:", data->name);
+    printf("\n$%s:", data->name);
     fgets(buff, BUFF_SIZE, stdin);
     send(data->sock, buff, strlen(buff), 0);
 
@@ -21,6 +26,7 @@ void *send_msg(void *arg) {
   }
   
   pthread_mutex_unlock(&m);
+  pthread_mutex_destroy(&m);
   return NULL;
 }
 
@@ -28,6 +34,7 @@ void *get_msg(void *arg) {
   thread_data *data = (thread_data *)arg;
   char buff[BUFF_SIZE];
 
+  pthread_mutex_init(&m, NULL);
   pthread_mutex_lock(&m);
   while (1) {
     // int bytes_read = read(data->sock, buff, BUFF_SIZE - 1);
@@ -38,11 +45,13 @@ void *get_msg(void *arg) {
     }
 
     buff[bytes_read] = '\0';
-    printf("1:%s\n", buff);
+    printf("\n1:%s\n", buff);
     log_msg(buff, "get_log.txt");
   }
 
   pthread_mutex_unlock(&m);
+  pthread_mutex_destroy(&m);
+
   return NULL;
 }
 
