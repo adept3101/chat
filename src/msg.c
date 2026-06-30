@@ -18,7 +18,7 @@ void *send_msg(void *arg) {
   pthread_mutex_init(&m, NULL);
   pthread_mutex_lock(&m);
   while (1) {
-    printf("\n$%s:", data->name);
+    printf("$%s:", data->name);
     fgets(buff, BUFF_SIZE, stdin);
     send(data->sock, buff, strlen(buff), 0);
 
@@ -45,7 +45,7 @@ void *get_msg(void *arg) {
     }
 
     buff[bytes_read] = '\0';
-    printf("\n1:%s\n", buff);
+    printf("1:%s", buff);
     log_msg(buff, "get_log.txt");
   }
 
