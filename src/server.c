@@ -13,7 +13,7 @@
 int main() {
   struct sockaddr_in addr, _client;
   int sock = socket(AF_INET, SOCK_STREAM, 0);
-  pthread_t thr1, thr2;
+  pthread_t thr_send, thr_get;
   thread_data data;
   int opt = 1;
 
@@ -67,11 +67,11 @@ int main() {
 
   // pthread_mutex_init(&m, NULL);
 
-  pthread_create(&thr1, NULL, send_msg, &data);
-  pthread_create(&thr2, NULL, get_msg, &data);
+  pthread_create(&thr_send, NULL, send_msg, &data);
+  pthread_create(&thr_get, NULL, get_msg, &data);
 
-  pthread_join(thr1, NULL);
-  pthread_join(thr2, NULL);
+  pthread_join(thr_send, NULL);
+  pthread_join(thr_get, NULL);
 
   // pthread_mutex_destroy(&m);
 
