@@ -4,13 +4,17 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 
 void init_addr(struct sockaddr_in *addr, int port, char *ip) {
+  memset(addr, 0, sizeof(*addr));
 
   addr->sin_family = AF_INET;
   addr->sin_addr.s_addr = inet_addr(ip);
   addr->sin_port = htons(port);
+
+  return;
 }
 
 int create_server(int port, char *ip) {
@@ -41,7 +45,7 @@ int create_server(int port, char *ip) {
                 (socklen_t *)&client_addr);
 }
 
-void connect_server(int port, char *ip) {
+int connect_server(int port, char *ip) {
   struct sockaddr_in addr;
   int sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -53,4 +57,6 @@ void connect_server(int port, char *ip) {
   } else {
     printf("Connect ok\n");
   }
+
+  return sock;
 }

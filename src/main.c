@@ -1,4 +1,5 @@
 #include <netinet/in.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "sercli.h"
 #include "msg.h"
@@ -20,7 +21,7 @@ int main() {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
 
   init_addr(&addr, PORT, IP);
-  create_server(PORT, IP);
+  data.sock = create_server(PORT, IP);
 
   pthread_t thr_get, thr_send;
 
@@ -29,6 +30,8 @@ int main() {
 
   pthread_join(thr_send, NULL);
   pthread_join(thr_get, NULL);
+
+  close(data.sock);
 
   // return 0;
 }
