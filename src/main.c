@@ -33,11 +33,21 @@ int main() {
 
   int choose;
   printf("=====MENU=====\n");
-  printf("Server: 1\n Client: 2\n");
+  printf("Server: 1\nClient: 2\n");
   printf(":");
   scanf("%d", &choose);
 
-  data.sock = create_server(PORT, IP);
+  switch(choose) {
+    case 1:
+      data.sock = create_server(PORT, IP);
+
+    case 2:
+      data.sock = connect_server(PORT, IP);
+
+    default:
+      printf("Unavailable\n");
+  }
+  // data.sock = create_server(PORT, IP);
 
   pthread_t thr_get, thr_send;
 
