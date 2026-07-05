@@ -1,12 +1,20 @@
-#include <netinet/in.h>
-#include <unistd.h>
-#include <stdio.h>
-#include "sercli.h"
-#include "msg.h"
 #include "config.h"
+#include "msg.h"
+#include "sercli.h"
+#include <netinet/in.h>
+#include <pthread.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <pthread.h>
+#include <unistd.h>
+
+// enum Command { SERVER, CLIENT, UNKNOWN };
+//
+// enum Command select_command(char *str) {
+//   if (strcpy(str, "server") == 0) return SERVER;
+//   if (strcpy(str, "client") == 0) return  CLIENT;
+//   return UNKNOWN;
+// }
 
 int main() {
   thread_data data;
@@ -17,10 +25,18 @@ int main() {
 
   strcpy(data.name, name);
 
+  
   struct sockaddr_in addr;
   int sock = socket(AF_INET, SOCK_STREAM, 0);
 
   init_addr(&addr, PORT, IP);
+
+  int choose;
+  printf("=====MENU=====\n");
+  printf("Server: 1\n Client: 2\n");
+  printf(":");
+  scanf("%d", &choose);
+
   data.sock = create_server(PORT, IP);
 
   pthread_t thr_get, thr_send;
