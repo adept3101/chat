@@ -25,12 +25,6 @@ int main() {
 
   strcpy(data.name, name);
 
-  
-  struct sockaddr_in addr;
-  int sock = socket(AF_INET, SOCK_STREAM, 0);
-
-  init_addr(&addr, PORT, IP);
-
   int choose;
   printf("=====MENU=====\n");
   printf("Server: 1\nClient: 2\n");
@@ -40,14 +34,16 @@ int main() {
   switch(choose) {
     case 1:
       data.sock = create_server(PORT, IP);
+      break;
 
     case 2:
       data.sock = connect_server(PORT, IP);
+      break;
 
     default:
       printf("Unavailable\n");
+      return 1;
   }
-  // data.sock = create_server(PORT, IP);
 
   pthread_t thr_get, thr_send;
 
@@ -59,5 +55,5 @@ int main() {
 
   close(data.sock);
 
-  // return 0;
+  return 0;
 }

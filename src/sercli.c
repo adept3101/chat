@@ -59,4 +59,5 @@ int connect_server(int port, char *ip) {
   }
 
   return sock;
+  // return connect(sock, (struct  sockaddr *)&addr, sizeof(addr));
 }
